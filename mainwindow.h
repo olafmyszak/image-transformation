@@ -6,6 +6,7 @@
 #include "QLayoutItem"
 #include "QLayout"
 #include "vector"
+#include "memory"
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -17,7 +18,7 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
-	QImage *reference_image, *transformed_image;
+	std::unique_ptr<QImage> reference_image, transformed_image;
 
   public:
 	MainWindow(QWidget *parent = nullptr);

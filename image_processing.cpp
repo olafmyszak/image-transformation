@@ -71,14 +71,12 @@ void rotate(double alphaDegrees)
 	transformationMatrix = matrixMultiply(rotationMatrix, transformationMatrix);
 }
 
-void scale(double scaleFactor, QImage *&dst)
+void scale(double scaleFactor, QImage &dst)
 {
-	auto format = dst->format();
-	auto size = dst->size();
+//	auto format = dst.format();
+//	auto size = dst.size();
 
-	delete dst;
-
-	dst = new QImage(size / scaleFactor, format);
+	dst = QImage(dst.size() / scaleFactor, dst.format());
 
 	const std::vector<std::vector<double>> scaleMatrix = {
 		{scaleFactor, 0.0, 0.0},

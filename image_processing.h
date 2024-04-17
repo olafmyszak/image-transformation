@@ -7,7 +7,7 @@ void translate(double dx, double dy);
 
 void rotate(double alphaDegrees);
 
-void scale(double scaleFactor, QImage *&dst);
+void scale(double scaleFactor, QImage &dst);
 
 void applyTransformations(const QImage &src, QImage &dst);
 

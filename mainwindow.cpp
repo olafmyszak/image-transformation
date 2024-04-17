@@ -1,11 +1,13 @@
 #include <QSlider>
+#include <memory>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "QFileDialog"
 
 #include "image_processing.h"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), reference_image(nullptr), transformed_image(nullptr),
+	ui(new Ui::MainWindow), rot_slider(nullptr), trans_x_slider(nullptr), trans_y_slider(nullptr), scale_slider(nullptr)
 {
 	ui->setupUi(this);
 
@@ -13,9 +15,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(ui->actionRotate, SIGNAL(triggered(bool)), this, SLOT(openRotate(bool)));
 	connect(ui->actionTranslate, SIGNAL(triggered(bool)), this, SLOT(openTranslate(bool)));
 	connect(ui->actionScale, SIGNAL(triggered(bool)), this, SLOT(openScale(bool)));
-
-	reference_image = transformed_image = nullptr;
-	rot_slider = trans_y_slider = trans_x_slider = scale_slider = nullptr;
 }
 
 MainWindow::~MainWindow()
@@ -26,8 +25,6 @@ MainWindow::~MainWindow()
 	delete trans_x_slider;
 	delete scale_slider;
 
-	delete reference_image;
-	delete transformed_image;
 }
 
 void MainWindow::openImage(bool)
@@ -36,11 +33,8 @@ void MainWindow::openImage(bool)
 	{
 		clearTransformationMatrix();
 
-		delete reference_image;
-		delete transformed_image;
-
-		reference_image = new QImage(name);
-		transformed_image = new QImage(name);
+		reference_image = std::make_unique<QImage> (name);
+		transformed_image = std::make_unique<QImage> (name);
 
 		ui->src->setPixmap(QPixmap::fromImage(*reference_image));
 		ui->dst->setPixmap(QPixmap::fromImage(*transformed_image));
@@ -66,7 +60,6 @@ void MainWindow::openRotate(bool)
 
 		connect(rot_slider, SIGNAL(valueChanged(int)), this, SLOT(changeRotation(int)));
 	}
-
 }
 
 void MainWindow::changeRotation(int alpha)
@@ -153,9 +146,9 @@ void MainWindow::openScale(bool)
 
 void MainWindow::changeScale(int value)
 {
-	const double new_scale = value/10.0;
+	const double new_scale = value / 10.0;
 
-	scale(last_scale/new_scale, transformed_image);
+	scale(last_scale / new_scale, *transformed_image);
 	last_scale = new_scale;
 
 	applyTransformations(*reference_image, *transformed_image);
