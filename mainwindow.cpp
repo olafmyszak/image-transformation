@@ -6,7 +6,7 @@
 
 #include "image_processing.h"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), reference_image(nullptr), transformed_image(nullptr),
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 	ui(new Ui::MainWindow), rot_slider(nullptr), trans_x_slider(nullptr), trans_y_slider(nullptr), scale_slider(nullptr)
 {
 	ui->setupUi(this);
@@ -33,11 +33,11 @@ void MainWindow::openImage(bool)
 	{
 		clearTransformationMatrix();
 
-		reference_image = std::make_unique<QImage> (name);
-		transformed_image = std::make_unique<QImage> (name);
+		reference_image = QImage(name);
+		transformed_image = reference_image;
 
-		ui->src->setPixmap(QPixmap::fromImage(*reference_image));
-		ui->dst->setPixmap(QPixmap::fromImage(*transformed_image));
+		ui->src->setPixmap(QPixmap::fromImage(reference_image));
+		ui->dst->setPixmap(QPixmap::fromImage(transformed_image));
 
 		last_x = last_y = last_alpha = 0;
 		last_scale = 100;
@@ -48,7 +48,7 @@ void MainWindow::openImage(bool)
 
 void MainWindow::openRotate(bool)
 {
-	if (reference_image != nullptr)
+	if (!reference_image.isNull())
 	{
 		clearLayout(ui->verticalLayout);
 
@@ -66,20 +66,20 @@ void MainWindow::changeRotation(int alpha)
 {
 	const double new_alpha = alpha / 1000.0;
 
-	translate(transformed_image->width() / 2.0, transformed_image->height() / 2.0);
+	translate(transformed_image.width() / 2.0, transformed_image.height() / 2.0);
 	rotate(new_alpha - last_alpha);
 
 	last_alpha = new_alpha;
-	translate(-transformed_image->width() / 2.0, -transformed_image->height() / 2.0);
+	translate(-transformed_image.width() / 2.0, -transformed_image.height() / 2.0);
 
-	applyTransformations(*reference_image, *transformed_image);
+	applyTransformations(reference_image, transformed_image);
 
-	ui->dst->setPixmap(QPixmap::fromImage(*transformed_image));
+	ui->dst->setPixmap(QPixmap::fromImage(transformed_image));
 }
 
 void MainWindow::openTranslate(bool)
 {
-	if (reference_image != nullptr)
+	if (!reference_image.isNull())
 	{
 		clearLayout(ui->verticalLayout);
 
@@ -107,8 +107,8 @@ void MainWindow::changeTranslationX(int dx)
 
 	rotate(last_alpha);
 
-	applyTransformations(*reference_image, *transformed_image);
-	ui->dst->setPixmap(QPixmap::fromImage(*transformed_image));
+	applyTransformations(reference_image, transformed_image);
+	ui->dst->setPixmap(QPixmap::fromImage(transformed_image));
 }
 
 void MainWindow::changeTranslationY(int dy)
@@ -123,14 +123,14 @@ void MainWindow::changeTranslationY(int dy)
 
 	rotate(last_alpha);
 
-	applyTransformations(*reference_image, *transformed_image);
+	applyTransformations(reference_image, transformed_image);
 
-	ui->dst->setPixmap(QPixmap::fromImage(*transformed_image));
+	ui->dst->setPixmap(QPixmap::fromImage(transformed_image));
 }
 
 void MainWindow::openScale(bool)
 {
-	if (reference_image != nullptr)
+	if (!reference_image.isNull())
 	{
 		clearLayout(ui->verticalLayout);
 
@@ -148,11 +148,11 @@ void MainWindow::changeScale(int value)
 {
 	const double new_scale = value / 10.0;
 
-	scale(last_scale / new_scale, *transformed_image);
+	scale(last_scale / new_scale, transformed_image);
 	last_scale = new_scale;
 
-	applyTransformations(*reference_image, *transformed_image);
-	ui->dst->setPixmap(QPixmap::fromImage(*transformed_image));
+	applyTransformations(reference_image, transformed_image);
+	ui->dst->setPixmap(QPixmap::fromImage(transformed_image));
 }
 
 void MainWindow::setSliders()
@@ -169,8 +169,8 @@ void MainWindow::setSliders()
 	if (trans_x_slider != nullptr)
 	{
 		trans_x_slider->blockSignals(true);
-		trans_x_slider->setMinimum(-reference_image->width() * 10);
-		trans_x_slider->setMaximum(reference_image->width() * 10);
+		trans_x_slider->setMinimum(-reference_image.width() * 10);
+		trans_x_slider->setMaximum(reference_image.width() * 10);
 		trans_x_slider->setValue((int) last_x * 10);
 		trans_x_slider->blockSignals(false);
 	}
@@ -178,8 +178,8 @@ void MainWindow::setSliders()
 	if (trans_y_slider != nullptr)
 	{
 		trans_y_slider->blockSignals(true);
-		trans_y_slider->setMinimum(-reference_image->height() * 10);
-		trans_y_slider->setMaximum(reference_image->height() * 10);
+		trans_y_slider->setMinimum(-reference_image.height() * 10);
+		trans_y_slider->setMaximum(reference_image.height() * 10);
 		trans_y_slider->setValue((int) last_y * 10);
 		trans_y_slider->blockSignals(false);
 	}
