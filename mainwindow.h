@@ -2,10 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "QSlider"
-#include "QLayoutItem"
-#include "QLayout"
-#include "vector"
+#include <QSlider>
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -17,7 +14,7 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
-	QImage *reference_image, *transformed_image;
+	QImage reference_image, transformed_image;
 
   public:
 	MainWindow(QWidget *parent = nullptr);

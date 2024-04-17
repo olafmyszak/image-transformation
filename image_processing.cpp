@@ -71,14 +71,9 @@ void rotate(double alphaDegrees)
 	transformationMatrix = matrixMultiply(rotationMatrix, transformationMatrix);
 }
 
-void scale(double scaleFactor, QImage *&dst)
+void scale(double scaleFactor, QImage &dst)
 {
-	auto format = dst->format();
-	auto size = dst->size();
-
-	delete dst;
-
-	dst = new QImage(size / scaleFactor, format);
+	dst = QImage(dst.size() / scaleFactor, dst.format());
 
 	const std::vector<std::vector<double>> scaleMatrix = {
 		{scaleFactor, 0.0, 0.0},
@@ -105,13 +100,14 @@ void applyTransformations(const QImage &src, QImage &dst)
 			double xp = transformationMatrix[0][0] * x + transformationMatrix[0][1] * y + transformationMatrix[0][2];
 			double yp = transformationMatrix[1][0] * x + transformationMatrix[1][1] * y + transformationMatrix[1][2];
 
-			if (xp >= 0 && xp < srcWidth && yp >= 0 && yp < srcHeight)
-			{
-				int x0 = std::floor(xp);
-				int x1 = x0 + 1;
-				int y0 = std::floor(yp);
-				int y1 = y0 + 1;
+			int x0 = std::floor(xp);
+			int x1 = x0 + 1;
+			int y0 = std::floor(yp);
+			int y1 = y0 + 1;
 
+			if (x0 >= 0 && x0 < srcWidth && y0 >= 0 && y0 < srcHeight && x1 >= 0 && x1 < srcWidth && y1 >= 0 &&
+				y1 < srcHeight)
+			{
 				double tx = xp - x0;
 				double ty = yp - y0;
 				double w00 = (1.0 - tx) * (1.0 - ty);
@@ -128,7 +124,6 @@ void applyTransformations(const QImage &src, QImage &dst)
 				int green = w00 * qGreen(*p00) + w01 * qGreen(*p01) + w10 * qGreen(*p10) + w11 * qGreen(*p11);
 				int blue = w00 * qBlue(*p00) + w01 * qBlue(*p01) + w10 * qBlue(*p10) + w11 * qBlue(*p11);
 
-
 				qBound(0, red, 255);
 				qBound(0, green, 255);
 				qBound(0, blue, 255);
@@ -137,7 +132,7 @@ void applyTransformations(const QImage &src, QImage &dst)
 			}
 			else
 			{
-				dst.setPixel(x, y, 0);
+				rgb_dst[x] = 0;
 			}
 		}
 	}

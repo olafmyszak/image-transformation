@@ -1,11 +1,11 @@
-#include <QSlider>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "QFileDialog"
 
 #include "image_processing.h"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
+	ui(new Ui::MainWindow), rot_slider(nullptr), trans_x_slider(nullptr), trans_y_slider(nullptr), scale_slider(nullptr)
 {
 	ui->setupUi(this);
 
@@ -13,9 +13,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(ui->actionRotate, SIGNAL(triggered(bool)), this, SLOT(openRotate(bool)));
 	connect(ui->actionTranslate, SIGNAL(triggered(bool)), this, SLOT(openTranslate(bool)));
 	connect(ui->actionScale, SIGNAL(triggered(bool)), this, SLOT(openScale(bool)));
-
-	reference_image = transformed_image = nullptr;
-	rot_slider = trans_y_slider = trans_x_slider = scale_slider = nullptr;
 }
 
 MainWindow::~MainWindow()
@@ -25,9 +22,6 @@ MainWindow::~MainWindow()
 	delete trans_y_slider;
 	delete trans_x_slider;
 	delete scale_slider;
-
-	delete reference_image;
-	delete transformed_image;
 }
 
 void MainWindow::openImage(bool)
@@ -36,14 +30,11 @@ void MainWindow::openImage(bool)
 	{
 		clearTransformationMatrix();
 
-		delete reference_image;
-		delete transformed_image;
+		reference_image = QImage(name);
+		transformed_image = reference_image;
 
-		reference_image = new QImage(name);
-		transformed_image = new QImage(name);
-
-		ui->src->setPixmap(QPixmap::fromImage(*reference_image));
-		ui->dst->setPixmap(QPixmap::fromImage(*transformed_image));
+		ui->src->setPixmap(QPixmap::fromImage(reference_image));
+		ui->dst->setPixmap(QPixmap::fromImage(transformed_image));
 
 		last_x = last_y = last_alpha = 0;
 		last_scale = 100;
@@ -54,7 +45,7 @@ void MainWindow::openImage(bool)
 
 void MainWindow::openRotate(bool)
 {
-	if (reference_image != nullptr)
+	if (!reference_image.isNull())
 	{
 		clearLayout(ui->verticalLayout);
 
@@ -66,27 +57,26 @@ void MainWindow::openRotate(bool)
 
 		connect(rot_slider, SIGNAL(valueChanged(int)), this, SLOT(changeRotation(int)));
 	}
-
 }
 
 void MainWindow::changeRotation(int alpha)
 {
 	const double new_alpha = alpha / 1000.0;
 
-	translate(transformed_image->width() / 2.0, transformed_image->height() / 2.0);
+	translate(transformed_image.width() / 2.0, transformed_image.height() / 2.0);
 	rotate(new_alpha - last_alpha);
 
 	last_alpha = new_alpha;
-	translate(-transformed_image->width() / 2.0, -transformed_image->height() / 2.0);
+	translate(-transformed_image.width() / 2.0, -transformed_image.height() / 2.0);
 
-	applyTransformations(*reference_image, *transformed_image);
+	applyTransformations(reference_image, transformed_image);
 
-	ui->dst->setPixmap(QPixmap::fromImage(*transformed_image));
+	ui->dst->setPixmap(QPixmap::fromImage(transformed_image));
 }
 
 void MainWindow::openTranslate(bool)
 {
-	if (reference_image != nullptr)
+	if (!reference_image.isNull())
 	{
 		clearLayout(ui->verticalLayout);
 
@@ -114,8 +104,8 @@ void MainWindow::changeTranslationX(int dx)
 
 	rotate(last_alpha);
 
-	applyTransformations(*reference_image, *transformed_image);
-	ui->dst->setPixmap(QPixmap::fromImage(*transformed_image));
+	applyTransformations(reference_image, transformed_image);
+	ui->dst->setPixmap(QPixmap::fromImage(transformed_image));
 }
 
 void MainWindow::changeTranslationY(int dy)
@@ -130,14 +120,14 @@ void MainWindow::changeTranslationY(int dy)
 
 	rotate(last_alpha);
 
-	applyTransformations(*reference_image, *transformed_image);
+	applyTransformations(reference_image, transformed_image);
 
-	ui->dst->setPixmap(QPixmap::fromImage(*transformed_image));
+	ui->dst->setPixmap(QPixmap::fromImage(transformed_image));
 }
 
 void MainWindow::openScale(bool)
 {
-	if (reference_image != nullptr)
+	if (!reference_image.isNull())
 	{
 		clearLayout(ui->verticalLayout);
 
@@ -153,13 +143,13 @@ void MainWindow::openScale(bool)
 
 void MainWindow::changeScale(int value)
 {
-	const double new_scale = value/10.0;
+	const double new_scale = value / 10.0;
 
-	scale(last_scale/new_scale, transformed_image);
+	scale(last_scale / new_scale, transformed_image);
 	last_scale = new_scale;
 
-	applyTransformations(*reference_image, *transformed_image);
-	ui->dst->setPixmap(QPixmap::fromImage(*transformed_image));
+	applyTransformations(reference_image, transformed_image);
+	ui->dst->setPixmap(QPixmap::fromImage(transformed_image));
 }
 
 void MainWindow::setSliders()
@@ -176,8 +166,8 @@ void MainWindow::setSliders()
 	if (trans_x_slider != nullptr)
 	{
 		trans_x_slider->blockSignals(true);
-		trans_x_slider->setMinimum(-reference_image->width() * 10);
-		trans_x_slider->setMaximum(reference_image->width() * 10);
+		trans_x_slider->setMinimum(-reference_image.width() * 10);
+		trans_x_slider->setMaximum(reference_image.width() * 10);
 		trans_x_slider->setValue((int) last_x * 10);
 		trans_x_slider->blockSignals(false);
 	}
@@ -185,8 +175,8 @@ void MainWindow::setSliders()
 	if (trans_y_slider != nullptr)
 	{
 		trans_y_slider->blockSignals(true);
-		trans_y_slider->setMinimum(-reference_image->height() * 10);
-		trans_y_slider->setMaximum(reference_image->height() * 10);
+		trans_y_slider->setMinimum(-reference_image.height() * 10);
+		trans_y_slider->setMaximum(reference_image.height() * 10);
 		trans_y_slider->setValue((int) last_y * 10);
 		trans_y_slider->blockSignals(false);
 	}
