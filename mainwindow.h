@@ -18,8 +18,7 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
-//	std::unique_ptr<QImage> reference_image, transformed_image;
-		QImage reference_image, transformed_image;
+	QImage reference_image, transformed_image;
 
   public:
 	MainWindow(QWidget *parent = nullptr);

@@ -13,5 +13,4 @@ void applyTransformations(const QImage &src, QImage &dst);
 
 void clearTransformationMatrix();
 
-
 #endif // IMAGE_PROCESSING_H

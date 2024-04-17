@@ -33,9 +33,6 @@ void MainWindow::openImage(bool)
 	{
 		clearTransformationMatrix();
 
-//		reference_image = std::make_unique<QImage>(name);
-//		transformed_image = std::make_unique<QImage>(name);
-
 		reference_image = QImage(name);
 		transformed_image = reference_image;
 
