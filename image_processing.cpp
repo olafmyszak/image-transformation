@@ -105,8 +105,7 @@ void applyTransformations(const QImage &src, QImage &dst)
 			int y0 = std::floor(yp);
 			int y1 = y0 + 1;
 
-			if (x0 >= 0 && x0 < srcWidth && y0 >= 0 && y0 < srcHeight && x1 >= 0 && x1 < srcWidth && y1 >= 0 &&
-				y1 < srcHeight)
+			if (x0 >= 0 && y0 >= 0 && x1 < srcWidth && y1 < srcHeight)
 			{
 				double tx = xp - x0;
 				double ty = yp - y0;
