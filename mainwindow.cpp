@@ -1,5 +1,3 @@
-#include <QSlider>
-#include <memory>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "QFileDialog"
@@ -24,7 +22,6 @@ MainWindow::~MainWindow()
 	delete trans_y_slider;
 	delete trans_x_slider;
 	delete scale_slider;
-
 }
 
 void MainWindow::openImage(bool)

@@ -2,11 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "QSlider"
-#include "QLayoutItem"
-#include "QLayout"
-#include "vector"
-#include "memory"
+#include <QSlider>
 
 QT_BEGIN_NAMESPACE
 namespace Ui
