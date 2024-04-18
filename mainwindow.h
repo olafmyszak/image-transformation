@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QSlider>
+#include "memory"
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -17,9 +18,9 @@ class MainWindow : public QMainWindow
 	QImage reference_image, transformed_image;
 
   public:
-	MainWindow(QWidget *parent = nullptr);
+	explicit MainWindow(QWidget *parent = nullptr);
 
-	~MainWindow();
+	~MainWindow() override;
 
   public slots:
 
@@ -40,17 +41,19 @@ class MainWindow : public QMainWindow
 	void changeScale(int);
 
   private:
-	Ui::MainWindow *ui;
-	QSlider *rot_slider;
-	QSlider *trans_x_slider;
-	QSlider *trans_y_slider;
-	QSlider *scale_slider;
+//	Ui::MainWindow *ui;
+//	QSlider *rot_slider;
+//	QSlider *trans_x_slider;
+//	QSlider *trans_y_slider;
+//	QSlider *scale_slider;
+	std::unique_ptr<Ui::MainWindow> ui;
+	std::unique_ptr<QSlider> rot_slider, trans_x_slider, trans_y_slider, scale_slider;
 	double last_y = 0;
 	double last_x = 0;
 	double last_alpha = 0;
 	double last_scale = 100;
 
-	void clearLayout(QLayout *layout);
+	void clearSliders();
 
 	void setSliders();
 };

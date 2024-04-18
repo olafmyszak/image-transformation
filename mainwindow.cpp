@@ -15,14 +15,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 	connect(ui->actionScale, SIGNAL(triggered(bool)), this, SLOT(openScale(bool)));
 }
 
-MainWindow::~MainWindow()
-{
-	delete ui;
-	delete rot_slider;
-	delete trans_y_slider;
-	delete trans_x_slider;
-	delete scale_slider;
-}
+MainWindow::~MainWindow() = default;
 
 void MainWindow::openImage(bool)
 {
@@ -47,15 +40,15 @@ void MainWindow::openRotate(bool)
 {
 	if (!reference_image.isNull())
 	{
-		clearLayout(ui->verticalLayout);
+		clearSliders();
 
-		rot_slider = new QSlider(Qt::Horizontal);
+		rot_slider = std::make_unique<QSlider>(Qt::Horizontal);
 
 		setSliders();
 
-		ui->verticalLayout->addWidget(rot_slider);
+		ui->verticalLayout->addWidget(rot_slider.get());
 
-		connect(rot_slider, SIGNAL(valueChanged(int)), this, SLOT(changeRotation(int)));
+		connect(rot_slider.get(), SIGNAL(valueChanged(int)), this, SLOT(changeRotation(int)));
 	}
 }
 
@@ -78,18 +71,18 @@ void MainWindow::openTranslate(bool)
 {
 	if (!reference_image.isNull())
 	{
-		clearLayout(ui->verticalLayout);
+		clearSliders();
 
-		trans_x_slider = new QSlider(Qt::Horizontal);
-		trans_y_slider = new QSlider(Qt::Horizontal);
+		trans_x_slider = std::make_unique<QSlider>(Qt::Horizontal);
+		trans_y_slider = std::make_unique<QSlider>(Qt::Horizontal);
 
 		setSliders();
 
-		ui->verticalLayout->addWidget(trans_x_slider);
-		ui->verticalLayout->addWidget(trans_y_slider);
+		ui->verticalLayout->addWidget(trans_x_slider.get());
+		ui->verticalLayout->addWidget(trans_y_slider.get());
 
-		connect(trans_x_slider, SIGNAL(valueChanged(int)), this, SLOT(changeTranslationX(int)));
-		connect(trans_y_slider, SIGNAL(valueChanged(int)), this, SLOT(changeTranslationY(int)));
+		connect(trans_x_slider.get(), SIGNAL(valueChanged(int)), this, SLOT(changeTranslationX(int)));
+		connect(trans_y_slider.get(), SIGNAL(valueChanged(int)), this, SLOT(changeTranslationY(int)));
 	}
 }
 
@@ -129,15 +122,15 @@ void MainWindow::openScale(bool)
 {
 	if (!reference_image.isNull())
 	{
-		clearLayout(ui->verticalLayout);
+		clearSliders();
 
-		scale_slider = new QSlider(Qt::Horizontal);
+		scale_slider = std::make_unique<QSlider>(Qt::Horizontal);
 
 		setSliders();
 
-		ui->verticalLayout->addWidget(scale_slider);
+		ui->verticalLayout->addWidget(scale_slider.get());
 
-		connect(scale_slider, SIGNAL(valueChanged(int)), this, SLOT(changeScale(int)));
+		connect(scale_slider.get(), SIGNAL(valueChanged(int)), this, SLOT(changeScale(int)));
 	}
 }
 
@@ -191,21 +184,10 @@ void MainWindow::setSliders()
 	}
 }
 
-void MainWindow::clearLayout(QLayout *layout)
+void MainWindow::clearSliders()
 {
-	QLayoutItem *item;
-	while ((item = layout->takeAt(0)) != nullptr)
-	{
-		if (item->layout())
-		{
-			clearLayout(item->layout());
-		}
-		if (item->widget())
-		{
-			delete item->widget();
-		}
-		delete item;
-	}
-
-	rot_slider = trans_y_slider = trans_x_slider = scale_slider = nullptr;
+	rot_slider = nullptr;
+	trans_y_slider = nullptr;
+	trans_x_slider = nullptr;
+	scale_slider = nullptr;
 }
