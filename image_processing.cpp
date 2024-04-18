@@ -1,6 +1,7 @@
 #include "image_processing.h"
 #include "cmath"
 #include "array"
+#include "qdebug.h"
 
 std::array<std::array<double, 3>, 3> transformationMatrix = {{{{1.0, 0.0, 0.0}}, {{0.0, 1.0, 0.0}}, {{0.0, 0.0, 1.0}}}};
 
@@ -77,6 +78,11 @@ void scale(double scaleFactor, QImage &dst)
 	transformationMatrix = multiply3x3Matrix(scaleMatrix, transformationMatrix);
 }
 
+inline bool essentiallyEqual(double a, double b)
+{
+	return fabs(a - b) <= ((fabs(a) > fabs(b) ? fabs(b) : fabs(a)) * 1.0E-4);
+}
+
 void applyTransformations(const QImage &src, QImage &dst)
 {
 	const int dstHeight = dst.height();
@@ -84,18 +90,41 @@ void applyTransformations(const QImage &src, QImage &dst)
 	const int srcHeight = src.height();
 	const int srcWidth = src.width();
 
+	const double tm00 = transformationMatrix[0][0];
+	const double tm01 = transformationMatrix[0][1];
+	const double tm10 = transformationMatrix[1][0];
+	const double tm11 = transformationMatrix[1][1];
+
+	double xp = transformationMatrix[0][2] - tm01;
+	double yp = transformationMatrix[1][2] - tm11;
+
 	for (int y = 0; y < dstHeight; ++y)
 	{
 		QRgb *rgb_dst = (QRgb *) dst.scanLine(y);
 
+		const auto temp_x = xp;
+		const auto temp_y = yp;
+
+		xp += tm01 - tm00;
+		yp += tm11 - tm10;
+
 		for (int x = 0; x < dstWidth; ++x)
 		{
-			const double xp = transformationMatrix[0][0] * x + transformationMatrix[0][1] * y + transformationMatrix[0][2];
-			const double yp = transformationMatrix[1][0] * x + transformationMatrix[1][1] * y + transformationMatrix[1][2];
+//			const double lol = transformationMatrix[0][0] * x + transformationMatrix[0][1] * y + transformationMatrix[0][2];
+//			const double trol = transformationMatrix[1][0] * x + transformationMatrix[1][1] * y + transformationMatrix[1][2];
 
-			const int x0 = std::floor(xp);
+			xp += tm00;
+			yp += tm10;
+
+//			if(!essentiallyEqual(xp, lol) || !essentiallyEqual(yp, trol))
+//			{
+//				qDebug() << "xp: "<<xp<<" lol: "<<lol;
+//				qDebug() << "yp: "<<yp<<" trol: "<<trol;
+//			}
+
+			const int x0 = int(xp);
 			const int x1 = x0 + 1;
-			const int y0 = std::floor(yp);
+			const int y0 = int(yp);
 			const int y1 = y0 + 1;
 
 			if (x0 >= 0 && y0 >= 0 && x1 < srcWidth && y1 < srcHeight)
@@ -107,10 +136,10 @@ void applyTransformations(const QImage &src, QImage &dst)
 				const double w10 = (1.0 - tx) * ty;
 				const double w11 = tx * ty;
 
-				const QRgb p00 = *((const QRgb * const) (src.scanLine(y0)) + x0);
-				const QRgb p01 = *((const QRgb * const) (src.scanLine(y0)) + x1);
-				const QRgb p10 = *((const QRgb * const) (src.scanLine(y1)) + x0);
-				const QRgb p11 = *((const QRgb * const) (src.scanLine(y1)) + x1);
+				const QRgb p00 = *((const QRgb *) (src.scanLine(y0)) + x0);
+				const QRgb p01 = *((const QRgb *) (src.scanLine(y0)) + x1);
+				const QRgb p10 = *((const QRgb *) (src.scanLine(y1)) + x0);
+				const QRgb p11 = *((const QRgb *) (src.scanLine(y1)) + x1);
 
 				const int red = w00 * qRed(p00) + w01 * qRed(p01) + w10 * qRed(p10) + w11 * qRed(p11);
 				const int green = w00 * qGreen(p00) + w01 * qGreen(p01) + w10 * qGreen(p10) + w11 * qGreen(p11);
@@ -123,5 +152,8 @@ void applyTransformations(const QImage &src, QImage &dst)
 				rgb_dst[x] = 0;
 			}
 		}
+		xp = temp_x + tm01;
+		yp = temp_y + tm11;
+
 	}
 }
