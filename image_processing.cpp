@@ -9,9 +9,8 @@ void clearTransformationMatrix()
 	transformationMatrix = {{{{1.0, 0.0, 0.0}}, {{0.0, 1.0, 0.0}}, {{0.0, 0.0, 1.0}}}};
 }
 
-std::array<std::array<double, 3>, 3> multiply3x3Matrix(const std::array<std::array<double, 3>, 3> &a,
-													   const std::array<std::array<double, 3>, 3> &b,
-													   double epsilon = 1e-6)
+constexpr std::array<std::array<double, 3>, 3> multiply3x3Matrix(const std::array<std::array<double, 3>, 3> &a,
+																 const std::array<std::array<double, 3>, 3> &b)
 {
 	std::array<std::array<double, 3>, 3> c{};
 
@@ -25,7 +24,7 @@ std::array<std::array<double, 3>, 3> multiply3x3Matrix(const std::array<std::arr
 			{
 				c[i][j] += a[i][k] * b[k][j];
 
-				if (std::abs(c[i][j]) < epsilon)
+				if (std::abs(c[i][j]) < 1.0E-5)
 				{
 					c[i][j] = 0.0;
 				}
