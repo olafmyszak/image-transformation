@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
-project(projek4)
+project(projekt4)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_AUTOMOC ON)
@@ -15,11 +15,11 @@ find_package(Qt6 COMPONENTS
         Widgets
         REQUIRED)
 
-add_executable(projek4 main.cpp
+add_executable(projekt4 main.cpp
         mainwindow.cpp
         image_processing.cpp
 )
-target_link_libraries(projek4
+target_link_libraries(projekt4
         Qt::Core
         Qt::Gui
         Qt::Widgets
